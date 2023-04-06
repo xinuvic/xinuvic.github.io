@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>XIN (SOPHIA) - Academic Website</title>
-	<!-- Add any necessary CSS or JavaScript files here -->
-	 <style>
+    <meta charset="UTF-8">
+    <title>XIN (SOPHIA) - Academic Website</title>
+    <!-- Add any necessary CSS or JavaScript files here -->
+    <style>
         body {
             font-family: Arial, sans-serif;
             color: #333;
@@ -16,6 +16,8 @@
             background-color: #f8f8f8;
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
         }
 
         h1 {
@@ -92,25 +94,49 @@
         a:hover {
             color: #333;
         }
+
+        .profile-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+
+        @media screen and (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-img {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
     </style>
-	
 </head>
+
 <body>
-	<header>
-		<h1>XIN (SOPHIA) GU</h1>
-		<P>Pronouns she/her/hers</P>
-		<nav>
-			<ul>
-				<li><a href="#about">About</a></li>
-				<li><a href="#research">Research</a></li>
-				<li><a href="#awards">Awards</a></li>
-				<li><a href="#publications">Publications</a></li>
-				<li><a href="#teaching">Teaching</a></li>
-				<li><a href="#service">Services</a></li>
-				<li><a href="#contact">Contact</a></li>
-			</ul>
-		</nav>
-	</header>
+    <header>
+        <img class="profile-img" src="profile-photo.jpg" alt="Profile Photo">
+        <div>
+            <h1>XIN (SOPHIA) GU</h1>
+            <p>Pronouns she/her/hers</p>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#awards">Awards</a></li>
+                <li><a href="#publications">Publications</a></li>
+                <li><a href="#teaching">Teaching</a></li>
+                <li><a href="#service">Services</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+	
 	<main>
 		<section id="about">
 			<h2>About</h2>
