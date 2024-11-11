@@ -20,7 +20,7 @@
 </head>
 <body>
     <!-- Background Music -->
-    <audio id="bgMusic" autoplay loop muted>
+    <audio id="bgMusic" loop>
         <source src="SZA_Snooze.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
@@ -143,6 +143,13 @@
                 if (firework.isComplete()) fireworks.splice(index, 1);
             });
 
+            // Draw "X + A" text at the center of the canvas
+            ctx.fillStyle = "white";
+            ctx.font = "100px Arial"; // Large font size
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle"; // Center text vertically
+            ctx.fillText("X + A", canvas.width / 2, canvas.height / 2);
+
             requestAnimationFrame(animate);
         }
 
@@ -156,14 +163,15 @@
             fireworks.push(new Firework(startX, startY, targetX, targetY, color, message));
         }
 
-        setInterval(launchFirework, 2000);
+        setInterval(launchFirework, 500); // Increase frequency of fireworks
         animate();
 
         // Enable music playback on any click
         window.addEventListener('click', () => {
             const bgMusic = document.getElementById("bgMusic");
-            bgMusic.muted = false;
-            bgMusic.play();
+            bgMusic.play().catch((error) => {
+                console.error("Music failed to play:", error);
+            });
         });
 
         window.addEventListener("resize", () => {
