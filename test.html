@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X&A LOVE INFINITY</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        #fireworkCanvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- music -->
+    <audio id="bgMusic" autoplay loop>
+        <source src="SZA_Snooze.mp3" type="audio/mpeg">
+        not support audio
+    </audio>
+
+    <!-- fairworks Canvas -->
+    <canvas id="fireworkCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("fireworkCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Firework {
+            constructor(x, y, targetX, targetY, color) {
+                this.x = x;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.color = color;
+                this.trail = [];
+                this.exploded = false;
+            }
+
+            update() {
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 5) {
+                    this.exploded = true;
+                    this.explode();
+                } else {
+                    this.x += dx / 20;
+                    this.y += dy / 20;
+                    this.trail.push({ x: this.x, y: this.y });
+                    if (this.trail.length > 10) this.trail.shift();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            explode() {
+                for (let i = 0; i < 50; i++) {
+                    particles.push(new Particle(this.x, this.y, this.color));
+                }
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.lifetime = 100;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * 6 - 3;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.lifetime -= 2;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.lifetime / 100;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        const fireworks = [];
+        const particles = [];
+        const colors = ["#FF1461", "#18FF92", "#5A87FF", "#FBF38C"];
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            fireworks.forEach((firework, index) => {
+                firework.update();
+                firework.draw();
+                if (firework.exploded) fireworks.splice(index, 1);
+            });
+
+            particles.forEach((particle, index) => {
+                particle.update();
+                particle.draw();
+                if (particle.lifetime <= 0) particles.splice(index, 1);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function launchFirework() {
+            const startX = Math.random() * canvas.width;
+            const startY = canvas.height;
+            const targetX = Math.random() * canvas.width;
+            const targetY = Math.random() * canvas.height / 2;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            fireworks.push(new Firework(startX, startY, targetX, targetY, color));
+        }
+
+        setInterval(launchFirework, 500);
+        animate();
+
+        // adjust size
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
