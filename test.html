@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X&A LOVE INFINITY</title>
+    <title>Love Fireworks</title>
     <style>
         body {
             margin: 0;
@@ -19,13 +19,13 @@
     </style>
 </head>
 <body>
-    <!-- music -->
-    <audio id="bgMusic" autoplay loop>
+    <!-- Background Music -->
+    <audio id="bgMusic" autoplay loop muted>
         <source src="SZA_Snooze.mp3" type="audio/mpeg">
-        not support audio
+        Your browser does not support the audio element.
     </audio>
 
-    <!-- fairworks Canvas -->
+    <!-- Firework Canvas -->
     <canvas id="fireworkCanvas"></canvas>
 
     <script>
@@ -34,47 +34,70 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        // Array of messages for the fireworks
+        const loveMessages = ["Love", "❤️", "X + A", "Forever", "💕"];
+
         class Firework {
-            constructor(x, y, targetX, targetY, color) {
-                this.x = x;
-                this.y = y;
+            constructor(startX, startY, targetX, targetY, color, message) {
+                this.x = startX;
+                this.y = startY;
                 this.targetX = targetX;
                 this.targetY = targetY;
                 this.color = color;
-                this.trail = [];
+                this.message = message;
+                this.particles = [];
                 this.exploded = false;
+                this.speedY = -8; // Launch speed
+                this.alpha = 1;
             }
 
             update() {
-                const dx = this.targetX - this.x;
-                const dy = this.targetY - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 5) {
-                    this.exploded = true;
-                    this.explode();
+                if (!this.exploded) {
+                    this.y += this.speedY;
+                    if (this.y <= this.targetY) {
+                        this.explode();
+                    }
                 } else {
-                    this.x += dx / 20;
-                    this.y += dy / 20;
-                    this.trail.push({ x: this.x, y: this.y });
-                    if (this.trail.length > 10) this.trail.shift();
+                    this.particles.forEach(p => p.update());
                 }
             }
 
             draw() {
-                ctx.fillStyle = this.color;
-                for (let i = 0; i < this.trail.length; i++) {
-                    const t = this.trail[i];
+                if (!this.exploded) {
+                    ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.arc(t.x, t.y, 3, 0, Math.PI * 2);
+                    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
                     ctx.fill();
+                } else {
+                    this.particles.forEach(p => p.draw());
+                    this.drawMessage();
                 }
             }
 
             explode() {
-                for (let i = 0; i < 50; i++) {
-                    particles.push(new Particle(this.x, this.y, this.color));
+                this.exploded = true;
+                const particleCount = 100;
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = Math.PI * 2 * (i / particleCount);
+                    const radius = 50 * (1 - Math.sin(angle)) * 1.2;
+                    const px = this.x + radius * Math.cos(angle);
+                    const py = this.y - radius * Math.sin(angle);
+                    this.particles.push(new Particle(px, py, this.color));
                 }
+            }
+
+            drawMessage() {
+                ctx.fillStyle = "white";
+                ctx.font = "24px Arial";
+                ctx.textAlign = "center";
+                ctx.globalAlpha = this.alpha;
+                ctx.fillText(this.message, this.x, this.y);
+                this.alpha -= 0.02; // Fade out text
+                ctx.globalAlpha = 1;
+            }
+
+            isComplete() {
+                return this.exploded && this.particles.every(p => p.alpha <= 0) && this.alpha <= 0;
             }
         }
 
@@ -83,45 +106,41 @@
                 this.x = x;
                 this.y = y;
                 this.color = color;
-                this.lifetime = 100;
                 this.size = Math.random() * 3 + 1;
-                this.speedX = Math.random() * 6 - 3;
-                this.speedY = Math.random() * 6 - 3;
+                this.speedX = (Math.random() - 0.5) * 4;
+                this.speedY = (Math.random() - 0.5) * 4;
+                this.alpha = 1;
             }
 
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
-                this.lifetime -= 2;
+                this.alpha -= 0.02;
             }
 
             draw() {
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.lifetime / 100;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
+                if (this.alpha > 0) {
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = this.alpha;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
             }
         }
 
         const fireworks = [];
-        const particles = [];
         const colors = ["#FF1461", "#18FF92", "#5A87FF", "#FBF38C"];
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Draw and update each firework, and remove it if it’s complete
             fireworks.forEach((firework, index) => {
                 firework.update();
                 firework.draw();
-                if (firework.exploded) fireworks.splice(index, 1);
-            });
-
-            particles.forEach((particle, index) => {
-                particle.update();
-                particle.draw();
-                if (particle.lifetime <= 0) particles.splice(index, 1);
+                if (firework.isComplete()) fireworks.splice(index, 1);
             });
 
             requestAnimationFrame(animate);
@@ -133,13 +152,20 @@
             const targetX = Math.random() * canvas.width;
             const targetY = Math.random() * canvas.height / 2;
             const color = colors[Math.floor(Math.random() * colors.length)];
-            fireworks.push(new Firework(startX, startY, targetX, targetY, color));
+            const message = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            fireworks.push(new Firework(startX, startY, targetX, targetY, color, message));
         }
 
-        setInterval(launchFirework, 500);
+        setInterval(launchFirework, 2000);
         animate();
 
-        // adjust size
+        // Enable music playback on any click
+        window.addEventListener('click', () => {
+            const bgMusic = document.getElementById("bgMusic");
+            bgMusic.muted = false;
+            bgMusic.play();
+        });
+
         window.addEventListener("resize", () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
